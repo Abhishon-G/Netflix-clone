@@ -248,3 +248,13 @@ export default function DetailModal() {
                     </Grid>
                   ))}
                 </Grid>
+              </Container>
+            )}
+          </Box>                {/* ✅ close Box */}
+        </DialogContent>        {/* ✅ close DialogContent */}
+      </Dialog>                 {/* ✅ close Dialog */}
+    );
+  }
+
+  return null;
+}
