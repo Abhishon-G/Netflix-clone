@@ -136,7 +136,8 @@ export default function DetailModal() {
               />
               <IconButton
                 onClick={() => {
-                  setDetailType({ mediaType: undefined, id: undefined });
+                  // ✅ FIX: use null instead of undefined
+                  setDetailType({ mediaType: null, id: null });
                 }}
                 sx={{
                   top: 15,
@@ -247,13 +248,3 @@ export default function DetailModal() {
                     </Grid>
                   ))}
                 </Grid>
-              </Container>
-            )}
-          </Box>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  return null;
-}
