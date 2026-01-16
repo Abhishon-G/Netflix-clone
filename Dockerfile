@@ -3,11 +3,10 @@ FROM node:16.17.0-alpine AS builder
 WORKDIR /app
 
 # Copy dependency manifests
-COPY ./package.json ./
-COPY ./package-lock.json ./   # include if you have package-lock.json
+COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -21,12 +20,7 @@ RUN npm run build
 # Production stage
 FROM nginx:stable-alpine
 WORKDIR /usr/share/nginx/html
-
-# Clean default nginx content
 RUN rm -rf ./*
-
-# Copy built app from builder
 COPY --from=builder /app/dist .
-
 EXPOSE 80
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
