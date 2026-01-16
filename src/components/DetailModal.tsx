@@ -136,7 +136,6 @@ export default function DetailModal() {
               />
               <IconButton
                 onClick={() => {
-                  // ✅ FIX: use null instead of undefined
                   setDetailType({ mediaType: null, id: null });
                 }}
                 sx={{
@@ -185,11 +184,7 @@ export default function DetailModal() {
                   </NetflixIconButton>
                 </Stack>
 
-                <Container
-                  sx={{
-                    p: "0px !important",
-                  }}
-                >
+                <Container sx={{ p: "0px !important" }}>
                   <Grid container spacing={5} alignItems="center">
                     <Grid item xs={12} sm={6} md={8}>
                       <Stack direction="row" spacing={1} alignItems="center">
@@ -250,9 +245,9 @@ export default function DetailModal() {
                 </Grid>
               </Container>
             )}
-          </Box>                {/* ✅ close Box */}
-        </DialogContent>        {/* ✅ close DialogContent */}
-      </Dialog>                 {/* ✅ close Dialog */}
+          </Box>
+        </DialogContent>
+      </Dialog>
     );
   }
 
