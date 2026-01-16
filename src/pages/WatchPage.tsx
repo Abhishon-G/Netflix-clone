@@ -18,7 +18,6 @@ import VolumeControllers from "src/components/watch/VolumeControllers";
 import VideoJSPlayer from "src/components/watch/VideoJSPlayer";
 import PlayerSeekbar from "src/components/watch/PlayerSeekbar";
 import PlayerControlButton from "src/components/watch/PlayerControlButton";
-import MainLoadingScreen from "src/components/MainLoadingScreen";
 import { SliderProps } from "@mui/material/Slider";
 
 export function Component() {
@@ -50,45 +49,42 @@ export function Component() {
         },
       ],
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowSize]);
 
   const handlePlayerReady = function (player: Player): void {
     player.on("pause", () => {
-      setPlayerState((draft) => {
-        return { ...draft, paused: true };
-      });
+      setPlayerState((draft) => ({ ...draft, paused: true }));
     });
 
     player.on("play", () => {
-      setPlayerState((draft) => {
-        return { ...draft, paused: false };
-      });
+      setPlayerState((draft) => ({ ...draft, paused: false }));
     });
 
     player.on("timeupdate", () => {
-      setPlayerState((draft) => {
-        return { ...draft, playedSeconds: player.currentTime() };
-      });
+      setPlayerState((draft) => ({
+        ...draft,
+        playedSeconds: player.currentTime() ?? 0, // ✅ ensure number
+      }));
     });
 
     player.one("durationchange", () => {
       setPlayerInitialized(true);
-      setPlayerState((draft) => ({ ...draft, duration: player.duration() }));
+      setPlayerState((draft) => ({
+        ...draft,
+        duration: player.duration() ?? 0, // ✅ ensure number
+      }));
     });
 
     playerRef.current = player;
-
-    setPlayerState((draft) => {
-      return { ...draft, paused: player.paused() };
-    });
+    setPlayerState((draft) => ({ ...draft, paused: player.paused() }));
   };
 
   const handleVolumeChange: SliderProps["onChange"] = (_, value) => {
     playerRef.current?.volume((value as number) / 100);
-    setPlayerState((draft) => {
-      return { ...draft, volume: (value as number) / 100 };
-    });
+    setPlayerState((draft) => ({
+      ...draft,
+      volume: (value as number) / 100,
+    }));
   };
 
   const handleSeekTo = (v: number) => {
@@ -101,11 +97,7 @@ export function Component() {
 
   if (!!videoJsOptions.width) {
     return (
-      <Box
-        sx={{
-          position: "relative",
-        }}
-      >
+      <Box sx={{ position: "relative" }}>
         <VideoJSPlayer options={videoJsOptions} onReady={handlePlayerReady} />
         {playerRef.current && playerInitialized && (
           <Box
@@ -117,11 +109,14 @@ export function Component() {
               position: "absolute",
             }}
           >
+            {/* Back button */}
             <Box px={2} sx={{ position: "absolute", top: 75 }}>
               <PlayerControlButton onClick={handleGoBack}>
                 <KeyboardBackspaceIcon />
               </PlayerControlButton>
             </Box>
+
+            {/* Title */}
             <Box
               px={2}
               sx={{
@@ -132,14 +127,13 @@ export function Component() {
             >
               <Typography
                 variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  color: "white",
-                }}
+                sx={{ fontWeight: 700, color: "white" }}
               >
                 Title
               </Typography>
             </Box>
+
+            {/* Age badge */}
             <Box
               px={{ xs: 0, sm: 1, md: 2 }}
               sx={{
@@ -163,6 +157,7 @@ export function Component() {
               </Typography>
             </Box>
 
+            {/* Controls */}
             <Box
               px={{ xs: 1, sm: 2 }}
               sx={{ position: "absolute", bottom: 20, left: 0, right: 0 }}
@@ -175,11 +170,10 @@ export function Component() {
                   seekTo={handleSeekTo}
                 />
               </Stack>
-              {/* end Seekbar */}
 
               {/* Controller */}
               <Stack direction="row" alignItems="center">
-                {/* left controller */}
+                {/* Left controller */}
                 <Stack
                   direction="row"
                   spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
@@ -187,17 +181,13 @@ export function Component() {
                 >
                   {!playerState.paused ? (
                     <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.pause();
-                      }}
+                      onClick={() => playerRef.current?.pause()}
                     >
                       <PauseIcon />
                     </PlayerControlButton>
                   ) : (
                     <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.play();
-                      }}
+                      onClick={() => playerRef.current?.play()}
                     >
                       <PlayArrowIcon />
                     </PlayerControlButton>
@@ -209,9 +199,10 @@ export function Component() {
                     muted={playerState.muted}
                     handleVolumeToggle={() => {
                       playerRef.current?.muted(!playerState.muted);
-                      setPlayerState((draft) => {
-                        return { ...draft, muted: !draft.muted };
-                      });
+                      setPlayerState((draft) => ({
+                        ...draft,
+                        muted: !draft.muted,
+                      }));
                     }}
                     value={playerState.volume}
                     handleVolume={handleVolumeChange}
@@ -222,9 +213,8 @@ export function Component() {
                     )}`}
                   </Typography>
                 </Stack>
-                {/* end left controller */}
 
-                {/* middle time */}
+                {/* Middle description */}
                 <Box flexGrow={1}>
                   <MaxLineTypography
                     maxLine={1}
@@ -235,9 +225,8 @@ export function Component() {
                     Description
                   </MaxLineTypography>
                 </Box>
-                {/* end middle time */}
 
-                {/* right controller */}
+                {/* Right controller */}
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -253,9 +242,7 @@ export function Component() {
                     <FullscreenIcon />
                   </PlayerControlButton>
                 </Stack>
-                {/* end right controller */}
               </Stack>
-              {/* end Controller */}
             </Box>
           </Box>
         )}
