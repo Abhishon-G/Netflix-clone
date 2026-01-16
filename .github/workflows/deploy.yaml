@@ -59,41 +59,24 @@ jobs:
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           docker push $ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-      # 🔟 Tag Docker image as latest
+                # Tag Docker image as latest
       - name: Tag Docker Image as latest
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           docker tag ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
             $ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
-      # 1️⃣1️⃣ Push latest tag to ECR
+      # Push latest tag to ECR
       - name: Push latest to ECR
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           docker push $ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
 
-      # 1️⃣2️⃣ Update ECS task definition and service
+      # Deploy to ECS
       - name: Deploy to ECS
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          IMAGE_URI=$ACCOUNT_ID.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-          # Get current task definition JSON
-          TASK_DEF=$(aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEFINITION }})
-
-          # Create new task definition JSON with updated image
-          echo $TASK_DEF \
-            | jq --arg IMAGE "$IMAGE_URI" '.taskDefinition.containerDefinitions[0].image = $IMAGE' \
-            > new-taskdef.json
-
-          # Register new task definition revision
-          NEW_TASK_DEF=$(aws ecs register-task-definition --cli-input-json file://new-taskdef.json --query taskDefinition.taskDefinitionArn --output text)
-
-          # Update ECS service to use new task definition
           aws ecs update-service \
             --cluster ${{ secrets.ECS_CLUSTER }} \
             --service ${{ secrets.ECS_SERVICE }} \
-            --task-definition $NEW_TASK_DEF \
             --force-new-deployment \
             --region ${{ secrets.AWS_REGION }}
